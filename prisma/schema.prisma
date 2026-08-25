@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  amount      Decimal
+  description String
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SharedExpense {
+  id           Int                @id @default(autoincrement())
+  description  String
+  totalAmount  Decimal
+  createdBy    Int
+  createdAt    DateTime           @default(now())
+  participants ParticipantShare[]
+}
+
+model ParticipantShare {
+  id              Int           @id @default(autoincrement())
+  sharedExpenseId Int
+  userId          Int
+  amount          Decimal
+  paid            Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  sharedExpense SharedExpense @relation(fields: [sharedExpenseId], references: [id])
+
+  @@unique([sharedExpenseId, userId])
+}
