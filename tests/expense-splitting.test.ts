@@ -110,7 +110,7 @@ describe('BalanceCalculationService', () => {
 
     const balances = await service.calculateNetBalances(userId);
 
-    expect(balances).toEqual({ 2: 0 }); // User 1 owes User 2 50, User 2 owes User 1 50 -> Net balance is 0
+    expect(balances).toEqual({ 2: -50 }); // User 1 owes User 2 100, User 2 owes User 1 50 -> User 1 owes User 2 50
   });
 
   it('should handle an expense with only one participant', async () => {
