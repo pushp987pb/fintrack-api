@@ -22,8 +22,11 @@ model SharedExpense {
   description  String
   totalAmount  Decimal
   createdBy    Int
+  splitType    String             @default("EQUAL")
   createdAt    DateTime           @default(now())
   participants ParticipantShare[]
+
+  @@index([createdBy])
 }
 
 model ParticipantShare {
@@ -36,5 +39,6 @@ model ParticipantShare {
 
   sharedExpense SharedExpense @relation(fields: [sharedExpenseId], references: [id])
 
+  @@index([userId])
   @@unique([sharedExpenseId, userId])
 }

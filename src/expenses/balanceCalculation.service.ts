@@ -1,5 +1,8 @@
 import { ExpenseRepository } from './expense.repository';
-import { SharedExpense, ParticipantShare } from '@prisma/client';
+
+type SharedExpenseResult = {
+  participants: Array<{ userId: number; amount: number }>;
+};
 
 export class BalanceCalculationService {
   private repository: ExpenseRepository;
@@ -20,15 +23,28 @@ export class BalanceCalculationService {
     description: string,
     totalAmount: number,
     createdBy: number,
-    participants: { userId: number; amount?: number }[]
-  ): Promise<SharedExpense> {
-    // Validate custom split totals if amounts are provided
-    const hasCustomAmounts = participants.some((p) => p.amount !== undefined);
-    if (hasCustomAmounts) {
+    participants: { userId: number; amount?: number }[],
+    splitType?: 'EQUAL' | 'CUSTOM'
+  ): Promise<SharedExpenseResult> {
+    if (participants.length === 0) {
+      throw new Error('At least one participant is required.');
+    }
+
+    const resolvedSplitType = splitType ?? (
+      participants.some((participant) => participant.amount !== undefined) ? 'CUSTOM' : 'EQUAL'
+    );
+
+    if (resolvedSplitType === 'CUSTOM') {
+      if (participants.some((p) => p.amount === undefined)) {
+        throw new Error('Custom split requires an amount for every participant.');
+      }
+
       const totalCustomAmount = participants.reduce((sum, p) => sum + (p.amount || 0), 0);
       if (totalCustomAmount !== totalAmount) {
         throw new Error('Custom split amounts must equal the total expense amount.');
       }
+    } else if (participants.some((p) => p.amount !== undefined)) {
+      throw new Error('Equal split must not include participant amounts.');
     }
 
     // Calculate equal split if no custom amounts are provided
@@ -39,7 +55,7 @@ export class BalanceCalculationService {
     }));
 
     return await this.repository.createSharedExpense(
-      { description, totalAmount, createdBy },
+      { description, totalAmount, createdBy, splitType: resolvedSplitType },
       participantShares
     );
   }
@@ -55,30 +71,29 @@ export class BalanceCalculationService {
     const balances: Record<number, number> = {};
 
     for (const expense of sharedExpenses) {
+      if (!expense.participants.some((participant: { userId: number }) => participant.userId === userId)) {
+        continue;
+      }
+
       for (const participant of expense.participants) {
         if (participant.userId === userId) {
-          // Skip the current user's own share
           continue;
         }
 
-        const amountOwed = participant.amount;
+        const amountOwed = Number(participant.amount);
         const isPaid = participant.paid;
 
         if (!isPaid) {
-          // Add or subtract the amount owed to/from the balance
-          balances[participant.userId] = (balances[participant.userId] || 0) + amountOwed;
+          const signedAmount = expense.createdBy === userId ? amountOwed : -amountOwed;
+          balances[participant.userId] = (balances[participant.userId] || 0) + signedAmount;
         }
       }
     }
 
-    // Simplify balances (e.g., User A owes User B 30, User B owes User A 10 -> User A owes User B 20)
     const simplifiedBalances: Record<number, number> = {};
     for (const [otherUserId, balance] of Object.entries(balances)) {
-      const otherUserBalance = balances[userId] || 0;
-      const netBalance = balance - otherUserBalance;
-
-      if (netBalance !== 0) {
-        simplifiedBalances[Number(otherUserId)] = netBalance;
+      if (balance !== 0) {
+        simplifiedBalances[Number(otherUserId)] = balance;
       }
     }
 

@@ -317,8 +317,6 @@ Generate JSDoc comments for public methods in ExpenseController and ExpenseRepos
 
 Create ARCHITECTURE.md for the FinTrack Expense Splitting project.
 
-Length: 10-15 lines.
-
 Include:
 
 - Relationship between Transaction and Expense Splitting modules
@@ -340,6 +338,47 @@ Return markdown only.
 
 **Brief Rationale:** Generated TOOL_STRATEGY.md.
 
+**Exact Prompt:**
+
+Create TOOL_STRATEGY.md for this GitHub Copilot assessment.
+
+Requirements:
+
+1. Feature Usage Log
+   - Minimum 6 entries
+   - Cover at least 4 GitHub Copilot features
+   - For each entry include:
+     - Feature used
+     - Why that feature was chosen
+     - Outcome
+
+2. Scenario Responses
+
+For each scenario below:
+- Name the specific Copilot feature
+- Explain why it is appropriate
+
+Scenarios:
+- Understanding a complex 500-line function in an unfamiliar codebase
+- Adding consistent error handling across existing route handlers
+- Quickly verifying a regex handles international phone number formats
+- Enforcing automated code quality checks on every pull request with no human intervention
+- Reviewing a teammate's AI-generated authentication module for security vulnerabilities
+- Ensuring Copilot follows project-specific conventions consistently across all developers and sessions
+
+3. Limitations Encountered
+
+Provide 3 real limitations from this project including:
+- Prompt used
+- What went wrong
+- How it was detected
+- How it was fixed
+- What would be done differently
+
+Use realistic examples from this project.
+
+Return markdown only.
+
 ---
 
 ## Prompt 12
@@ -349,6 +388,26 @@ Return markdown only.
 **Prompting Technique Used:** Iterative Refinement + Constraint-Based Prompting + Reflection
 
 **Brief Rationale:** Refined TOOL_STRATEGY.md to better align with actual project activities and requirements.
+
+**Exact Prompt:**
+
+Refine TOOL_STRATEGY.md.
+
+Requirements:
+
+1. Feature Usage Log must reference actual GitHub Copilot features including:
+   - Copilot Chat
+   - Copilot Inline Suggestions
+   - Code Generation
+   - Code Review
+
+2. Use examples that actually occurred in this project.
+
+3. Replace any generic or unrealistic examples.
+
+4. Include the Prisma SSL setup issue as one of the limitations encountered.
+
+Return complete TOOL_STRATEGY.md.
 
 ---
 
@@ -360,6 +419,57 @@ Return markdown only.
 
 **Brief Rationale:** Generated PR_DESCRIPTION.md.
 
+**Exact Prompt:**
+
+Create PR_DESCRIPTION.md for the FinTrack Expense Splitting project.
+
+Include:
+
+1. Summary of what was built and why.
+
+2. Commit History
+   Use Conventional Commits format with descriptive bodies.
+
+   Include:
+   - standards setup
+   - transaction review
+   - transaction remediation
+   - expense splitting feature
+   - tests and documentation
+
+3. AI Tool Disclosure
+   - Copilot features used
+   - Where AI output was accepted
+   - Where AI output was overridden
+   - Estimated AI-generated vs hand-written percentage
+
+4. Testing Coverage
+   Include:
+   - Equal split among 3 participants
+   - Custom split validation success
+   - Custom split validation failure
+   - Net balance calculation
+   - Single participant scenario
+   - Unauthorized access attempt
+
+5. Known Gaps
+
+6. One genuine implementation risk or trade-off
+
+7. Self-Review Checklist
+
+8. Peer Review Simulation
+
+Provide 3 peer review comments.
+
+Each comment must:
+- identify a file/location
+- suggest a change
+- explain why
+
+At least one comment should identify something AI tools commonly miss.
+
+Return markdown only.
 ---
 
 # Post-Generation Corrections
@@ -430,17 +540,6 @@ Corrections applied:
 - Verified all assessment-required scenarios
 
 ---
-
-## Prisma SSL Environment Issue
-
-Issue encountered:
-
-- Prisma CLI operations failed due to SSL certificate restrictions on the corporate environment.
-
-Corrections applied:
-
-- Created schema files manually
-- Continued architecture implementation without blocking development progress
 
 ---
 

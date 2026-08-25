@@ -286,8 +286,6 @@ Prompt:
 
 Create ARCHITECTURE.md for the FinTrack Expense Splitting project.
 
-Length: 10–15 lines.
-
 Include:
 
 - Relationship between Transaction and Expense Splitting modules

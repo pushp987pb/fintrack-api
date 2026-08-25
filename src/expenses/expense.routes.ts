@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { ExpenseController } from './expense.controller';
+import { ExpenseController } from './expenses.controller';
 import { ExpenseRepository } from './expense.repository';
 import { BalanceCalculationService } from './balanceCalculation.service';
 import { PrismaClient } from '@prisma/client';
+import { requireUser } from '../middleware/auth';
 
 const prisma = new PrismaClient();
 
@@ -15,19 +16,20 @@ const controller = new ExpenseController(
 );
 
 const router = Router();
+router.use(requireUser);
 
-/**
- * Expense routes.
- */
-router.post('/expenses', (req, res) =>
+// Create a shared expense and assign participant shares.
+router.post('/', (req, res) =>
   controller.createSharedExpense(req, res)
 );
 
-router.get('/expenses', (req, res) =>
+// Get shared expenses involving the authenticated user.
+router.get('/', (req, res) =>
   controller.getSharedExpenses(req, res)
 );
 
-router.get('/expenses/net-balance', (req, res) =>
+// Calculate the authenticated user's net balances with other participants.
+router.get('/net-balance', (req, res) =>
   controller.getNetBalance(req, res)
 );
 

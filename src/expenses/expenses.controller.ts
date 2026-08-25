@@ -20,34 +20,43 @@ export class ExpenseController {
       const schema = z.object({
         description: z.string().min(1).max(255),
         totalAmount: z.number().positive(),
-        participants: z.array(
-          z.object({
-            userId: z.number().int().positive(),
-            amount: z.number().positive(),
-          })
-        ),
+        splitType: z.enum(['EQUAL', 'CUSTOM']).optional(),
+        participants: z.array(z.object({
+          userId: z.number().int().positive(),
+          amount: z.number().positive().optional(),
+        })).min(2),
       });
 
-      const { description, totalAmount, participants } = schema.parse(req.body);
+      const { description, totalAmount, participants, splitType } = schema.parse(req.body);
+      const resolvedSplitType = splitType ?? (
+        participants.some((participant) => participant.amount !== undefined) ? 'CUSTOM' : 'EQUAL'
+      );
 
-      // Validate that participant amounts equal the total amount
-      const totalParticipantAmount = participants.reduce((sum, p) => sum + p.amount, 0);
-      if (totalParticipantAmount !== totalAmount) {
-        res.status(400).json({ error: 'Participant amounts must equal the total expense amount.' });
+      if (resolvedSplitType === 'CUSTOM' && participants.some((participant) => participant.amount === undefined)) {
+        res.status(400).json({ error: 'Custom split requires an amount for every participant.' });
+        return;
+      }
+
+      if (resolvedSplitType === 'EQUAL' && participants.some((participant) => participant.amount !== undefined)) {
+        res.status(400).json({ error: 'Equal split must not include participant amounts.' });
         return;
       }
 
       // Authorization: Ensure the user is the creator
       const createdBy = req.user.id;
 
-      const sharedExpense = await this.repository.createSharedExpense(
-        { description, totalAmount, createdBy },
-        participants
+      const sharedExpense = await this.balanceService.createSharedExpense(
+        description,
+        totalAmount,
+        createdBy,
+        participants,
+        resolvedSplitType
       );
 
       res.status(201).json(sharedExpense);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      res.status(400).json({ error: message });
     }
   }
 
@@ -61,7 +70,8 @@ export class ExpenseController {
       const sharedExpenses = await this.repository.getSharedExpensesByUser(userId);
       res.status(200).json(sharedExpenses);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      res.status(400).json({ error: message });
     }
   }
 
@@ -70,7 +80,7 @@ export class ExpenseController {
  */
 async getNetBalance(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.id;
+      const userId = req.user.id;
   
       const netBalance =
         await this.balanceService.calculateNetBalances(userId);

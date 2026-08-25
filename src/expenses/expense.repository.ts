@@ -14,7 +14,7 @@ export class ExpenseRepository {
    * @returns The created shared expense.
    */
   async createSharedExpense(
-    data: { description: string; totalAmount: number; createdBy: number },
+    data: { description: string; totalAmount: number; createdBy: number; splitType?: string },
     participants: { userId: number; amount: number }[]
   ): Promise<any> {
     return await this.prisma.sharedExpense.create({

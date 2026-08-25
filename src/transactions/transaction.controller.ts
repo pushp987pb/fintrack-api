@@ -24,7 +24,8 @@ export class TransactionController {
       const transaction = await this.service.createTransaction(userId, amount, description);
       res.status(201).json(transaction);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      res.status(400).json({ error: message });
     }
   }
 
@@ -33,7 +34,7 @@ export class TransactionController {
    */
   async getTransactionsByUser(req: Request, res: Response): Promise<void> {
     try {
-      const userId = parseInt(req.params.userId, 10);
+      const userId = parseInt(String(req.params.userId), 10);
       const { skip = 0, take = 10 } = req.query;
 
       // Authorization check
@@ -45,7 +46,8 @@ export class TransactionController {
       const transactions = await this.service.getTransactionsByUser(userId, Number(skip), Number(take));
       res.status(200).json(transactions);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      res.status(400).json({ error: message });
     }
   }
 
@@ -54,7 +56,7 @@ export class TransactionController {
    */
   async deleteAllTransactions(req: Request, res: Response): Promise<void> {
     try {
-      const userId = parseInt(req.params.userId, 10);
+      const userId = parseInt(String(req.params.userId), 10);
 
       // Authorization check
       if (req.user.id !== userId) {
@@ -65,7 +67,8 @@ export class TransactionController {
       const deletedCount = await this.service.deleteAllTransactions(userId);
       res.status(200).json({ deletedCount });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      res.status(400).json({ error: message });
     }
   }
 }
